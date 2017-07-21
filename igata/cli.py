@@ -2,10 +2,15 @@
 import argparse
 
 import domain
+import engine
 
 def main():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
+
+    parser_compile = subparsers.add_parser('generate')
+    parser_compile.add_argument('template', metavar='FILE', help='source template for a WLST-script')
+    parser_compile.set_defaults(func=engine.main)
 
     parser_domain = subparsers.add_parser('domain')
     parser_domain.add_argument('name', help='give this domain a specific name')
