@@ -1,9 +1,12 @@
 #-*- coding: utf-8 -*-
 
 domain = """
+import ntpath
 import os
+import posixpath
 import sys
 
+wl_home = os.environ["WL_HOME"]
 if len(sys.argv)<2:
     domain_path = os.path.dirname(sys.argv[0])
 else:
@@ -12,7 +15,8 @@ else:
 domain_name = '{domain[name]}'
 if not domain_name:
     domain_name = os.path.splitext(os.path.basename(sys.argv[0]))[0]
-wl_home = os.environ["WL_HOME"]
+domain_dir = os.path.normpath(os.path.join(domain_path, domain_name))
+domain_root_dir = os.path.join(domain_dir, 'domain-root')
 
 readTemplate(os.path.join(wl_home, 'common', 'templates', 'wls', 'wls.jar'))
 
@@ -31,13 +35,56 @@ cd('/')
 cd('Security/base_domain/User/{domain[user]}')
 cmo.setPassword('{domain[password]}')
 
-# If the domain already exists, overwrite the domain
 setOption('OverwriteDomain', 'true')
-
-# write the domain and close the template
-writeDomain(os.path.normpath(os.path.join(domain_path, domain_name)))
+writeDomain(domain_root_dir)
 
 closeTemplate()
+
+# Create custom configuration
+pre_classpath = 'pre-classpath'
+pre_classpath_dir = os.path.join(domain_dir, pre_classpath)
+try:
+    os.mkdir(pre_classpath_dir)
+except:
+    pass
+
+domain_env_file = os.path.join(domain_root_dir, 'bin', 'setUserOverrides')
+
+try:
+    f = open(domain_env_file + '.cmd', 'w')
+    f.write("@echo off\\n")
+    f.write("for %%%%a in (\\"%%DOMAIN_HOME%%/../%s/*\\") do (\\n" % pre_classpath)
+    f.write("   call :AddToPath %%a\\n")
+    f.write(")\\n")
+    f.write("echo %EXT_PRE_CLASSPATH%\\n")
+    f.write("goto :EOF\\n")
+    f.write("\\n")
+    f.write(":AddToPath\\n")
+    f.write("if NOT \\"%EXT_PRE_CLASSPATH%\\"==\\"\\" (\\n")
+    f.write("   set EXT_PRE_CLASSPATH=%EXT_PRE_CLASSPATH%;%1\\n")
+    f.write(") else (\\n")
+    f.write("   set EXT_PRE_CLASSPATH=%1\\n")
+    f.write(")\\n")
+    f.write("goto :EOF\\n")
+    f.close()
+except:
+    print "Failed to configuration to %s" % domain_env_file + '.cmd'
+
+try:
+    f = open(domain_env_file + '.sh', 'w')
+    f.write("for i in $DOMAIN_HOME/../%s/*; do\\n" % pre_classpath)
+    f.write("   if [ ! \\"$EXT_PRE_CLASSPATH\\" = \\"\\" ]; then\\n")
+    f.write("      EXT_PRE_CLASSPATH=$EXT_PRE_CLASSPATH:$i\\n")
+    f.write("   else\\n")
+    f.write("      EXT_PRE_CLASSPATH=$i\\n")
+    f.write("   fi\\n")
+    f.write("done\\n")
+    f.write("echo \\"EXT_PRE_CLASSPATH=$EXT_PRE_CLASSPATH\\"")
+    f.write("export EXT_PRE_CLASSPATH\\n")
+    f.close()
+except:
+    print "Failed to configuration to %s" % domain_env_file + '.sh'
+
 exit()
 """
 
