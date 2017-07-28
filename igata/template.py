@@ -1,15 +1,31 @@
 from collections import namedtuple
 
 import data
+from mode import scope, state
 
-Domain = namedtuple('Domain', ['name'])
 Credentials = namedtuple('Credentials', ['user', 'password'])
 
-def CreateDomain(domain, credentials):
+def OfflineScript(name = None):
     """
-    CreateDomain
+    Creates a new script file for editing a domain in offline mode.
 
-    Create a new domain
+    Shall be used in a 'with statement'.
+
+    with OfflineScript('scriptname'):
+       PreClasspathDir()
     """
-    print data.domain.format(domain={'name' : domain.name, 'user' : credentials.user, 'password' : credentials.password})
+    return scope(name, 'offline')
+
+def Domain(name, credentials):
+    """
+    Domain
+
+    Create a new domain.
+
+    Only to use in offline editing mode.
+    """
+    if state().editing_mode and state().editing_mode != 'offline':
+        raise SyntaxError('Domain can only be used in offline editing mode')
+
+    print data.domain.format(domain={'name' : name, 'user' : credentials.user, 'password' : credentials.password})
 

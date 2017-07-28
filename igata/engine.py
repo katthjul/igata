@@ -8,6 +8,12 @@ class Engine(object):
         self.output = StringIO.StringIO()
         sys.stdout = self.output
 
+        self.output_stack = []
+        self.output_done = []
+
+        self.result_file = None
+        self.identifier = 0
+
     def prepareTemplateFile(self, template_file):
         with open(template_file, 'r') as source:
             template = StringIO.StringIO()
@@ -22,18 +28,51 @@ class Engine(object):
         resultname = os.path.splitext(os.path.basename(resultfile))[0]
         return os.path.join(resultdir, resultname + '.py')
 
+    def scopeBegin(self, name = None):
+        if not name:
+            self.identifier += 1
+            name = 'script_' + str( self.identifier)
+
+        output = StringIO.StringIO();
+        sys.stdout = output
+
+        scoped_result_file = os.path.join(self.result_files_path, name + '.py')
+
+        self.output_stack.append( [ output, scoped_result_file]);
+
+        return self.result_file, scoped_result_file
+
+    def scopeEnd(self):
+        self.output_done.append( self.output_stack.pop())
+
+        if self.output_stack:
+            output = self.output_stack[-1]
+            sys.stdout = output[0];
+        else:
+            sys.stdout = self.output
+
+    def prepareOutputs(self, template_file):
+        self.result_files_path = os.path.dirname(template_file)
+
     def write(self, stream, filename):
+        size = stream.tell()
+        if not size:
+            return
         stream.seek(0)
         with open(filename, 'w') as resultfile:
             for line in stream:
                 resultfile.write(line)
 
     def run(self, template_file):
+        self.result_file = os.path.abspath(template_file)
+        self.prepareOutputs(template_file)
+
+        globalVariables = {}
         try:
             template = self.prepareTemplateFile(template_file)
             code = compile(template.getvalue(), template_file, 'exec')
             template.close()
-            exec(code, {})
+            exec(code, globalVariables)
         except (NameError, SyntaxError, TypeError) as e:
             sys.stderr.write( "Error in %s: %s.\n" % (os.path.realpath( template_file), str(e)))
             raise
@@ -42,6 +81,8 @@ class Engine(object):
 
         result_file = self.find_path_to_result_file(template_file)
         self.write(self.output, result_file)
+        for output, filename in self.output_done:
+            self.write(output, filename)
 
 def main(args):
     if not os.path.isfile(args.template):

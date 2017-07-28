@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 
-domain = """
+offline_begin = """
 import ntpath
 import os
 import posixpath
@@ -17,7 +17,13 @@ if not domain_name:
     domain_name = os.path.splitext(os.path.basename(sys.argv[0]))[0]
 domain_dir = os.path.normpath(os.path.join(domain_path, domain_name))
 domain_root_dir = os.path.join(domain_dir, 'domain-root')
+"""
 
+offline_end = """
+exit()
+"""
+
+domain = """
 readTemplate(os.path.join(wl_home, 'common', 'templates', 'wls', 'wls.jar'))
 
 # Configure the admin server
@@ -84,7 +90,5 @@ try:
     f.close()
 except:
     print "Failed to configuration to %s" % domain_env_file + '.sh'
-
-exit()
 """
 
