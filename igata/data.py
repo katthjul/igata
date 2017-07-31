@@ -12,7 +12,6 @@ if len(sys.argv)<2:
 else:
     domain_path = sys.argv[1]
 
-domain_name = '{domain[name]}'
 if not domain_name:
     domain_name = os.path.splitext(os.path.basename(sys.argv[0]))[0]
 domain_dir = os.path.normpath(os.path.join(domain_path, domain_name))
@@ -45,14 +44,17 @@ setOption('OverwriteDomain', 'true')
 writeDomain(domain_root_dir)
 
 closeTemplate()
+"""
 
 # Create custom configuration
-pre_classpath = 'pre-classpath'
-pre_classpath_dir = os.path.join(domain_dir, pre_classpath)
+pre_classpath_dir = """
+pre_classpath = '{domain[pre-classpath-dir]}'
+pre_classpath_path = os.path.join(domain_dir, pre_classpath)
+
 try:
-    os.mkdir(pre_classpath_dir)
+    os.mkdir(pre_classpath_path)
 except:
-    pass
+    print "Directory %s does already exists" % pre_classpath_path
 
 domain_env_file = os.path.join(domain_root_dir, 'bin', 'setUserOverrides')
 

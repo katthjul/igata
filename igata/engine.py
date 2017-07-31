@@ -54,12 +54,15 @@ class Engine(object):
     def prepareOutputs(self, template_file):
         self.result_files_path = os.path.dirname(template_file)
 
-    def write(self, stream, filename):
+    def write(self, stream, filename, pre_script_definitions):
         size = stream.tell()
         if not size:
             return
         stream.seek(0)
         with open(filename, 'w') as resultfile:
+            for definition in pre_script_definitions:
+                resultfile.write(definition + '\n')
+
             for line in stream:
                 resultfile.write(line)
 
@@ -79,10 +82,15 @@ class Engine(object):
 
         sys.stdout = sys.__stdout__
 
+        pre_script_definitions = globalVariables[ 'global_pre_script_definition_stack']
+        index = 0
+
         result_file = self.find_path_to_result_file(template_file)
-        self.write(self.output, result_file)
+        self.write(self.output, result_file, pre_script_definitions[index])
+
         for output, filename in self.output_done:
-            self.write(output, filename)
+            index += 1
+            self.write(output, filename, pre_script_definitions[index])
 
 def main(args):
     if not os.path.isfile(args.template):

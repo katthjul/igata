@@ -7,9 +7,16 @@ from engine import *
 def normalize(text):
     return re.sub( '[^\w]+', '_', text)
 
+global_pre_script_definition_stack = []
+
 class State:
     def __init__(self, mode = None):
         self.editing_mode = mode
+
+        self.pre_script_definitions = list()
+
+        global global_pre_script_definition_stack
+        global_pre_script_definition_stack.append(self.pre_script_definitions)
 
 global_current_state = State()
 
@@ -34,8 +41,8 @@ def scope(name, mode=None):
         yield
     finally:
         post_script_code()
-
         engine().scopeEnd()
+
         global_current_state = old_state
 
 def pre_script_code():
@@ -45,4 +52,7 @@ def pre_script_code():
 def post_script_code():
     if state().editing_mode == 'offline':
         print data.offline_end
+
+def add_pre_script_definition(pre_script_definition):
+    state().pre_script_definitions.append(pre_script_definition)
 
