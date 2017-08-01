@@ -12,12 +12,6 @@ def main():
     parser_compile.add_argument('template', metavar='FILE', help='source template for a WLST-script')
     parser_compile.set_defaults(func=engine.main)
 
-    parser_domain = subparsers.add_parser('domain')
-    parser_domain.add_argument('name', help='give this domain a specific name')
-    parser_domain.add_argument('--user', default = 'weblogic')
-    parser_domain.add_argument('--password', default = 'weblogic1')
-    parser_domain.set_defaults(func=domain.main)
-
     args = parser.parse_args()
     try:
         args.func(args)

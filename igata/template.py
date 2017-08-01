@@ -1,20 +1,22 @@
 from collections import namedtuple
 
 import data
-from mode import *
+from script import *
 
 Credentials = namedtuple('Credentials', ['user', 'password'])
 
-def OfflineScript(name = None):
+def Configuration(name = None):
     """
-    Creates a new script file for editing a domain in offline mode.
+    Configuration
+
+    A block with configuration for a domain.
 
     Shall be used in a 'with statement'.
 
     with OfflineScript('scriptname'):
        PreClasspathDir()
     """
-    return scope(name, 'offline')
+    return scope(name, 'config')
 
 def Domain(name, credentials):
     """
@@ -22,13 +24,15 @@ def Domain(name, credentials):
 
     Create a new domain.
 
-    Only to use in offline editing mode.
+    Only to use in a configuration block
     """
-    if state().editing_mode and state().editing_mode != 'offline':
-        raise SyntaxError('Domain can only be used in offline editing mode')
+    if state().block and state().block != 'config':
+        raise SyntaxError('Domain can only be used in a configuration block')
 
     add_pre_script_definition("domain_name = '%s'" % name)
-    print data.domain.format(domain={'user' : credentials.user, 'password' : credentials.password})
+    add_pre_script_definition("admin_user = '%s'" % credentials.user )
+    add_pre_script_definition("admin_password = '%s'" % credentials.password )
+    print data.domain.format(domain={'user' : 'admin_user', 'password' : 'admin_password'})
 
 def PreClasspathDir(dirname = None):
     """

@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 
-offline_begin = """
+config_begin = """
 import ntpath
 import os
 import posixpath
@@ -18,7 +18,7 @@ domain_dir = os.path.normpath(os.path.join(domain_path, domain_name))
 domain_root_dir = os.path.join(domain_dir, 'domain-root')
 """
 
-offline_end = """
+config_end = """
 exit()
 """
 
@@ -37,8 +37,8 @@ set('ListenPort', 7002)
 
 # Set the domain password for the WebLogic Server administration user
 cd('/')
-cd('Security/base_domain/User/{domain[user]}')
-cmo.setPassword('{domain[password]}')
+cd('Security/base_domain/User/%s' % {domain[user]})
+cmo.setPassword({domain[password]})
 
 setOption('OverwriteDomain', 'true')
 writeDomain(domain_root_dir)

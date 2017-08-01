@@ -82,15 +82,13 @@ class Engine(object):
 
         sys.stdout = sys.__stdout__
 
-        pre_script_definitions = globalVariables[ 'global_pre_script_definition_stack']
-        index = 0
+        pre_script_definitions = globalVariables[ 'global_pre_script_definitions']
 
         result_file = self.find_path_to_result_file(template_file)
-        self.write(self.output, result_file, pre_script_definitions[index])
+        self.write(self.output, result_file, pre_script_definitions)
 
         for output, filename in self.output_done:
-            index += 1
-            self.write(output, filename, pre_script_definitions[index])
+            self.write(output, filename, pre_script_definitions)
 
 def main(args):
     if not os.path.isfile(args.template):
