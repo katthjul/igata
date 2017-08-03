@@ -8,6 +8,7 @@ class Engine(object):
         self.output = StringIO.StringIO()
         sys.stdout = self.output
 
+
         self.output_stack = []
         self.output_done = []
 
@@ -60,8 +61,8 @@ class Engine(object):
             return
         stream.seek(0)
         with open(filename, 'w') as resultfile:
-            for definition in pre_script_definitions:
-                resultfile.write(definition + '\n')
+            for key, value in pre_script_definitions.items():
+                resultfile.write("%s = '%s'\n" % (key, value))
 
             for line in stream:
                 resultfile.write(line)
