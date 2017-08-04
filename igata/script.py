@@ -20,6 +20,7 @@ class State:
             self.pre_script_definitions.update(old_state.pre_script_definitions)
 
         self.initialized_blocks = set()
+        self.pre_block_definitions = {}
 
 global_current_state = State()
 
@@ -81,12 +82,20 @@ def pre_block_code(block):
 
     if block.startswith('wtc'):
         print data.wtc_begin
+    if block.startswith('wtc-import'):
+        name = state().pre_block_definitions['remote-access-point']
+        networkAddress = state().pre_block_definitions['remote-network-address']
+        print data.wtc_remote_access_point.format(remoteAccessPoint = {
+           'name': name, 'networkAddress': networkAddress })
 
     state().initialized_blocks.add(block)
 
 def post_block_code(block):
-    pass
+    state().pre_block_definitions.clear()
 
 def add_pre_script_definition(variable, value):
     state().pre_script_definitions[variable] = value
+
+def add_pre_block_definition(variable, value):
+    state().pre_block_definitions[variable] = value
 

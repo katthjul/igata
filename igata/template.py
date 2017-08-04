@@ -95,7 +95,29 @@ def WTCExport():
 
     return subscope('wtc-export')
 
+def WTCImport(name, networkAddress):
+    """
+    WTCImport
+
+    Imports remote services.
+
+    Only to use in a resource block.
+    """
+    if state().block and state().block != 'resources':
+        raise SyntaxError('WTCImport can only be used in a resources block')
+
+    add_pre_block_definition('remote-access-point', name)
+    add_pre_block_definition('remote-network-address', networkAddress)
+    return subscope('wtc-import-' + name)
+
 def Service(name, ejbName = ''):
+    """
+    Service
+
+    Define local or remote  service. EJB name is only used for local services.
+    """
     if state().subblock == 'wtc-export':
         print data.wtc_exported_service.format(service = { 'name' : name, 'ejbName' : ejbName})
+    elif state().subblock.startswith('wtc-import'):
+        print data.wtc_imported_service.format(service = { 'name' : name})
 

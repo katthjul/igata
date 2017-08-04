@@ -184,12 +184,30 @@ def addLocalAccessPoint():
     local_network_address = '//localhost:7003'
 
     cd('/WTCServers/%(wtcServer)s' % {'wtcServer' : wtc_server})
-    cmo.createWTCLocalTuxDom('%(localAccessPoint)s' % {'localAccessPoint' : local_access_point})
+    cmo.createWTCLocalTuxDom(local_access_point)
 
     cd('/WTCServers/%(wtcServer)s/WTCLocalTuxDoms/%(localAccessPoint)s' % {'wtcServer' : wtc_server, 'localAccessPoint' : local_access_point})
     cmo.setAccessPoint(local_access_point)
     cmo.setAccessPointId(local_access_point)
     cmo.setNWAddr(local_network_address)
+
+def addRemoteAccessPoint(remote_access_point, networkAddress):
+    try:
+        cd('/WTCServers/%(wtcServer)s/RemoteTuxDoms/%(remoteAccessPoint)s' % {'wtcServer' : wtc_server, 'remoteAccessPoint' : remote_access_point})
+        print "Remote access point %s does already exist" % remote_access_point
+        return
+    except:
+        pass
+    cd('/WTCServers/%(wtcServer)s' % {'wtcServer' : wtc_server})
+    cmo.createWTCRemoteTuxDom(remote_access_point)
+
+    cd('/WTCServers/%(wtcServer)s/RemoteTuxDoms/%(remoteAccessPoint)s' % {'wtcServer' : wtc_server, 'remoteAccessPoint' : remote_access_point})
+    cmo.setAccessPoint(remote_access_point)
+    cmo.setAccessPointId(remote_access_point)
+    cmo.setLocalAccessPoint(local_access_point)
+    cmo.setNWAddr(networkAddress)
+    cmo.setFederationURL('')
+    cmo.setFederationName('')
 
 def addExportedService(service_name, ejb_name):
     cd('/WTCServers/%(wtcServer)s' % {'wtcServer' : wtc_server})
@@ -200,6 +218,16 @@ def addExportedService(service_name, ejb_name):
     cmo.setLocalAccessPoint(local_access_point)
     cmo.setEJBName(ejb_name)
     cmo.setRemoteName('')
+
+def addImportedService(service_name, remote_access_point):
+    cd('/WTCServers/%(wtcServer)s' % {'wtcServer' : wtc_server})
+    cmo.createWTCImport(service_name)
+
+    cd('/WTCServers/%(wtcServer)s/Imports/%(serviceName)s' % {'wtcServer' : wtc_server, 'serviceName' : service_name})
+    cmo.setResourceName(service_name)
+    cmo.setLocalAccessPoint(local_access_point)
+    cmo.setRemoteAccessPointList(remote_access_point)
+    cmo.setRemoteName('')
 """
 
 wtc_begin = """
@@ -209,5 +237,14 @@ addLocalAccessPoint()
 
 wtc_exported_service = """
 addExportedService('{service[name]}', '{service[ejbName]}')
+"""
+
+wtc_remote_access_point = """
+remote_access_point = '{remoteAccessPoint[name]}'
+addRemoteAccessPoint(remote_access_point, '{remoteAccessPoint[networkAddress]}')
+"""
+
+wtc_imported_service = """
+addImportedService('{service[name]}', remote_access_point)
 """
 
