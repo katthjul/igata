@@ -82,3 +82,20 @@ def DataSource(jndiName, databaseName, host, portNumber, credentials):
       'user' : credentials.user,
       'password': credentials.password})
 
+def WTCExport():
+    """
+    WTCExport
+
+    Exports local services.
+
+    Only to use in a resource block.
+    """
+    if state().block and state().block != 'resources':
+        raise SyntaxError('WTCExport can only be used in a resources block')
+
+    return subscope('wtc-export')
+
+def Service(name, ejbName = ''):
+    if state().subblock == 'wtc-export':
+        print data.wtc_exported_service.format(service = { 'name' : name, 'ejbName' : ejbName})
+

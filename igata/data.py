@@ -31,7 +31,6 @@ startEdit()
 
 resources_end = """
 activate()
-#stopEdit(defaultAnswer='y')
 disconnect()
 exit()
 """
@@ -68,7 +67,7 @@ pre_classpath_path = os.path.join(domain_dir, pre_classpath)
 try:
     os.mkdir(pre_classpath_path)
 except:
-    print "Directory %s does already exists" % pre_classpath_path
+    print "Directory %s does already exist" % pre_classpath_path
 
 domain_env_file = os.path.join(domain_root_dir, 'bin', 'setUserOverrides')
 domain_pre_classpath = "%%DOMAIN_HOME%%/../%s" % pre_classpath
@@ -159,5 +158,56 @@ def addDataSource(name, jndiName, databaseName, host, portNumber, user, password
 
 data_source = """
 addDataSource('{dataSource[name]}', '{dataSource[jndiName]}', '{dataSource[databaseName]}', '{dataSource[host]}', '{dataSource[portNumber]}', '{dataSource[user]}', '{dataSource[password]}')
+"""
+
+wtc_function = """
+import socket
+wtc_server = 'WTCServer'
+local_access_point = socket.gethostname()
+def addWTCServer():
+    try:
+        cd('/WTCServers/%(wtcServer)s' % {'wtcServer' : wtc_server})
+        print "WTC-Server %s does already exist" % wtc_server
+        return
+    except:
+        pass
+    cd('/')
+    cmo.createWTCServer(wtc_server)
+
+def addLocalAccessPoint():
+    try:
+        cd('/WTCServers/%(wtcServer)s/WTCLocalTuxDoms/%(localAccessPoint)s' % {'wtcServer' : wtc_server, 'localAccessPoint' : local_access_point})
+        print "Local access point %s does already exist" % local_access_point
+        return
+    except:
+        pass
+    local_network_address = '//localhost:7003'
+
+    cd('/WTCServers/%(wtcServer)s' % {'wtcServer' : wtc_server})
+    cmo.createWTCLocalTuxDom('%(localAccessPoint)s' % {'localAccessPoint' : local_access_point})
+
+    cd('/WTCServers/%(wtcServer)s/WTCLocalTuxDoms/%(localAccessPoint)s' % {'wtcServer' : wtc_server, 'localAccessPoint' : local_access_point})
+    cmo.setAccessPoint(local_access_point)
+    cmo.setAccessPointId(local_access_point)
+    cmo.setNWAddr(local_network_address)
+
+def addExportedService(service_name, ejb_name):
+    cd('/WTCServers/%(wtcServer)s' % {'wtcServer' : wtc_server})
+    cmo.createWTCExport(service_name)
+
+    cd('/WTCServers/%(wtcServer)s/WTCExports/%(serviceName)s' % {'wtcServer' : wtc_server, 'serviceName' : service_name})
+    cmo.setResourceName(service_name)
+    cmo.setLocalAccessPoint(local_access_point)
+    cmo.setEJBName(ejb_name)
+    cmo.setRemoteName('')
+"""
+
+wtc_begin = """
+addWTCServer()
+addLocalAccessPoint()
+"""
+
+wtc_exported_service = """
+addExportedService('{service[name]}', '{service[ejbName]}')
 """
 
