@@ -80,8 +80,8 @@ def pre_block_code(block):
     if block in state().initialized_blocks:
         return
 
-    if block.startswith('wtc'):
-        print data.wtc_begin
+    if block == 'wtc-export':
+        print data.wtc_export_begin
     if block.startswith('wtc-import'):
         name = state().pre_block_definitions['remote-access-point']
         networkAddress = state().pre_block_definitions['remote-network-address']

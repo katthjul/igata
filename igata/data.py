@@ -165,74 +165,77 @@ import socket
 wtc_server = 'WTCServer'
 local_access_point = socket.gethostname()
 def addWTCServer():
-    try:
-        cd('/WTCServers/%(wtcServer)s' % {'wtcServer' : wtc_server})
-        print "WTC-Server %s does already exist" % wtc_server
-        return
-    except:
-        pass
     cd('/')
-    cmo.createWTCServer(wtc_server)
+    if cmo.lookupWTCServer(wtc_server):
+        return
+    server = cmo.createWTCServer(wtc_server)
+
+    server.addTarget(getMBean('/Servers/AdminServer'))
 
 def addLocalAccessPoint():
-    try:
-        cd('/WTCServers/%(wtcServer)s/WTCLocalTuxDoms/%(localAccessPoint)s' % {'wtcServer' : wtc_server, 'localAccessPoint' : local_access_point})
-        print "Local access point %s does already exist" % local_access_point
-        return
-    except:
-        pass
-    local_network_address = '//localhost:7003'
-
+    addWTCServer()
     cd('/WTCServers/%(wtcServer)s' % {'wtcServer' : wtc_server})
-    cmo.createWTCLocalTuxDom(local_access_point)
+    if cmo.lookupWTCLocalTuxDom(local_access_point):
+        return
+    local_network_address = '//localhost:7003'
+    localAP = cmo.createWTCLocalTuxDom(local_access_point)
 
-    cd('/WTCServers/%(wtcServer)s/WTCLocalTuxDoms/%(localAccessPoint)s' % {'wtcServer' : wtc_server, 'localAccessPoint' : local_access_point})
-    cmo.setAccessPoint(local_access_point)
-    cmo.setAccessPointId(local_access_point)
-    cmo.setNWAddr(local_network_address)
+    localAP.setAccessPoint(local_access_point)
+    localAP.setAccessPointId(local_access_point)
+    localAP.setNWAddr(local_network_address)
+    localAP.setConnectionPolicy('ON_STARTUP')
+    localAP.setRetryInterval(60)
+    localAP.setInteroperate('Yes')
 
 def addRemoteAccessPoint(remote_access_point, networkAddress):
-    try:
-        cd('/WTCServers/%(wtcServer)s/RemoteTuxDoms/%(remoteAccessPoint)s' % {'wtcServer' : wtc_server, 'remoteAccessPoint' : remote_access_point})
-        print "Remote access point %s does already exist" % remote_access_point
-        return
-    except:
-        pass
+    addWTCServer()
     cd('/WTCServers/%(wtcServer)s' % {'wtcServer' : wtc_server})
-    cmo.createWTCRemoteTuxDom(remote_access_point)
+    if cmo.lookupWTCRemoteTuxDom(remote_access_point):
+        return
+    remoteAP = cmo.createWTCRemoteTuxDom(remote_access_point)
 
-    cd('/WTCServers/%(wtcServer)s/RemoteTuxDoms/%(remoteAccessPoint)s' % {'wtcServer' : wtc_server, 'remoteAccessPoint' : remote_access_point})
-    cmo.setAccessPoint(remote_access_point)
-    cmo.setAccessPointId(remote_access_point)
-    cmo.setLocalAccessPoint(local_access_point)
-    cmo.setNWAddr(networkAddress)
-    cmo.setFederationURL('')
-    cmo.setFederationName('')
+    remoteAP.setAccessPoint(remote_access_point)
+    remoteAP.setAccessPointId(remote_access_point)
+    remoteAP.setLocalAccessPoint(local_access_point)
+    remoteAP.setNWAddr(networkAddress)
+    remoteAP.setConnectionPolicy('ON_STARTUP')
+    remoteAP.setAclPolicy('GLOBAL')
+    remoteAP.setCredentialPolicy('GLOBAL')
+    remoteAP.setAllowAnonymous(true)
 
 def addExportedService(service_name, ejb_name):
     cd('/WTCServers/%(wtcServer)s' % {'wtcServer' : wtc_server})
-    cmo.createWTCExport(service_name)
+    if cmo.lookupWTCExport(service_name):
+        print "Exported service %s does already exist. Skipping..." % service_name
+        return
+    print "Creating exported service %s." % service_name
+    service = cmo.createWTCExport(service_name)
 
-    cd('/WTCServers/%(wtcServer)s/WTCExports/%(serviceName)s' % {'wtcServer' : wtc_server, 'serviceName' : service_name})
-    cmo.setResourceName(service_name)
-    cmo.setLocalAccessPoint(local_access_point)
-    cmo.setEJBName(ejb_name)
-    cmo.setRemoteName('')
+    service.setResourceName(service_name)
+    service.setLocalAccessPoint(local_access_point)
+    service.setEJBName(ejb_name)
+    service.setRemoteName('')
 
 def addImportedService(service_name, remote_access_point):
     cd('/WTCServers/%(wtcServer)s' % {'wtcServer' : wtc_server})
-    cmo.createWTCImport(service_name)
+    if cmo.lookupWTCImport(service_name):
+        print "Imported service %s does already exist. Skipping..." % service_name
+        return
+    print "Creating imported service %s." % service_name
+    service = cmo.createWTCImport(service_name)
 
-    cd('/WTCServers/%(wtcServer)s/Imports/%(serviceName)s' % {'wtcServer' : wtc_server, 'serviceName' : service_name})
-    cmo.setResourceName(service_name)
-    cmo.setLocalAccessPoint(local_access_point)
-    cmo.setRemoteAccessPointList(remote_access_point)
-    cmo.setRemoteName('')
+    service.setResourceName(service_name)
+    service.setLocalAccessPoint(local_access_point)
+    service.setRemoteAccessPointList(remote_access_point)
+    service.setRemoteName('')
 """
 
-wtc_begin = """
-addWTCServer()
+wtc_export_begin = """
 addLocalAccessPoint()
+"""
+
+wtc_import_begin = """
+addRemoteAccessPoint()
 """
 
 wtc_exported_service = """
