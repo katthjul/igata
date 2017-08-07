@@ -67,6 +67,7 @@ def pre_script_code():
         print data.config_begin
     else:
         print data.data_source_function
+        print data.jms_function
         print data.wtc_function
         print data.resources_begin
 
@@ -82,16 +83,17 @@ def pre_block_code(block):
 
     if block == 'wtc-export':
         print data.wtc_export_begin
-    if block.startswith('wtc-import'):
+    elif block.startswith('wtc-import'):
         name = state().pre_block_definitions['remote-access-point']
         networkAddress = state().pre_block_definitions['remote-network-address']
         print data.wtc_remote_access_point.format(remoteAccessPoint = {
            'name': name, 'networkAddress': networkAddress })
+    elif block == 'messaging':
+        print data.jms_begin
 
     state().initialized_blocks.add(block)
 
 def post_block_code(block):
-    print "save()"
     state().pre_block_definitions.clear()
 
 def add_pre_script_definition(variable, value):

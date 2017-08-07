@@ -30,6 +30,7 @@ startEdit()
 """
 
 resources_end = """
+save()
 activate()
 disconnect()
 exit()
@@ -143,8 +144,6 @@ def addDataSource(name, jndiName, databaseName, host, portNumber, user, password
     properties.createProperty('driverType', '4')
 
     resource.getJDBCConnectionPoolParams().setTestTableName('SQL SELECT COUNT(*) FROM SYSIBM.SYSDUMMY1\\r\\n')
-
-    save()
 """
 
 data_source = """
@@ -179,7 +178,7 @@ def addLocalAccessPoint():
     localAP.setInteroperate('Yes')
 
 def addRemoteAccessPoint(remote_access_point, networkAddress):
-    addWTCServer()
+    addLocalAccessPoint()
     cd('/WTCServers/%(wtcServer)s' % {'wtcServer' : wtc_server})
     if cmo.lookupWTCRemoteTuxDom(remote_access_point):
         return
@@ -240,5 +239,67 @@ addRemoteAccessPoint(remote_access_point, '{remoteAccessPoint[networkAddress]}')
 
 wtc_imported_service = """
 addImportedService('{service[name]}', remote_access_point)
+"""
+
+jms_function = """
+jms_server = 'JMSServer'
+jms_module = 'JMSModule'
+jms_subdep = 'SubDeployment'
+def addJMSServer():
+    cd('/')
+    if cmo.lookupJMSServer(jms_server):
+        return
+    server = cmo.createJMSServer(jms_server)
+
+    server.setTargets(jarray.array([getMBean('/Servers/AdminServer')], weblogic.management.configuration.TargetMBean))
+
+def addJMSModule():
+    addJMSServer()
+    cd('/')
+    if cmo.lookupJMSSystemResource(jms_module):
+        return
+    module = cmo.createJMSSystemResource(jms_module)
+
+    module.setTargets(jarray.array([getMBean('/Servers/AdminServer')], weblogic.management.configuration.TargetMBean))
+
+    subdep = module.createSubDeployment(jms_subdep)
+    subdep.setTargets(jarray.array([getMBean('/JMSServers/%s' % jms_server)], weblogic.management.configuration.TargetMBean))
+
+def addConnectionFactory(name, jndiName):
+    cd('/JMSSystemResources/%(jmsModule)s/JMSResource/%(jmsModule)s'  % {'jmsModule' : jms_module})
+    if cmo.lookupConnectionFactory(name):
+        print "Connection factory %s does already exists. Skipping..." % name
+        return
+    print "Creating connection factory %s." % name
+    connectionFactory = cmo.createConnectionFactory(name)
+
+    connectionFactory.setJNDIName(jndiName)
+    connectionFactory.setSubDeploymentName(jms_subdep)
+
+    connectionFactory.getTransactionParams().setXAConnectionFactoryEnabled(true)
+
+def addQueue(name, jndiName):
+    cd('/JMSSystemResources/%(jmsModule)s/JMSResource/%(jmsModule)s'  % {'jmsModule' : jms_module})
+    if cmo.lookupQueue(name):
+        print "Queue %s does already exists. Skipping..." % name
+        return
+    print "Creating queue %s." % name
+    queue = cmo.createQueue(name)
+
+    queue.setJNDIName(jndiName)
+    queue.setSubDeploymentName(jms_subdep)
+"""
+
+jms_begin = """
+addJMSServer()
+addJMSModule()
+"""
+
+connection_factory = """
+addConnectionFactory('{factory[name]}', '{factory[jndiName]}')
+"""
+
+queue = """
+addQueue('{queue[name]}', '{queue[jndiName]}')
 """
 

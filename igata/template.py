@@ -121,3 +121,31 @@ def Service(name, ejbName = ''):
     elif state().subblock.startswith('wtc-import'):
         print data.wtc_imported_service.format(service = { 'name' : name})
 
+def Messaging():
+    """
+    Messaging
+
+    Creates JMS resources.
+
+    Only to use in a resource block.
+    """
+    if state().block and state().block != 'resources':
+        raise SyntaxError('Messaging can only be used in a resources block')
+    return subscope('messaging')
+
+def ConnectionFactory(jndiName):
+    """
+    ConnectionFactory
+
+    Creates a JMS connection factory.
+    """
+    print data.connection_factory.format(factory = {'name' : jndiName, 'jndiName' : jndiName})
+
+def Queue(jndiName):
+    """
+    Queue
+
+    Creates a JMS queue.
+    """
+    print data.queue.format(queue = {'name' : jndiName, 'jndiName' : jndiName})
+
