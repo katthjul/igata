@@ -74,7 +74,7 @@ def DataSource(jndiName, databaseName, host, portNumber, credentials):
         raise SyntaxError('DataSource can only be used in a resources block')
 
     print data.data_source.format(dataSource = {
-      'name': 'DataSource %s' % databaseName,
+      'name': databaseName,
       'jndiName': jndiName,
       'databaseName': databaseName,
       'host': host,

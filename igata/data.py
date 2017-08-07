@@ -109,49 +109,40 @@ except:
 """
 
 data_source_function = """
-def addProperty(name, key, value):
-    cd('/JDBCSystemResources/%(name)s/JDBCResource/%(name)s/JDBCDriverParams/%(name)s/Properties/%(name)s' % {'name' : name})
-    cmo.createProperty(key)
-
-    cd('/JDBCSystemResources/%(name)s/JDBCResource/%(name)s/JDBCDriverParams/%(name)s/Properties/%(name)s/Properties/%(key)s' % {'name' : name, 'key' : key})
-    cmo.setValue(value)
-
 def addDataSource(name, jndiName, databaseName, host, portNumber, user, password):
     dsURL = 'jdbc:db2://%(host)s:%(portNumber)s/%(databaseName)s' % {'host': host, 'portNumber': portNumber, 'databaseName' : databaseName}
     dsDriver = 'com.ibm.db2.jcc.DB2XADataSource'
 
     cd('/')
-    cmo.createJDBCSystemResource(name)
+    if cmo.lookupJDBCSystemResource(name):
+        print "JDBC resource %s does already exist. Skipping..." % name
+        return
+    print "Creating JDBC resource %s." % name
+    systemResource = cmo.createJDBCSystemResource(name)
+    systemResource.setTargets(jarray.array([getMBean('/Servers/AdminServer')], weblogic.management.configuration.TargetMBean))
 
-    cd('/JDBCSystemResources/%(name)s/JDBCResource/%(name)s' % {'name' : name})
-    cmo.setName(name)
+    resource = systemResource.getJDBCResource()
+    resource.setName(name)
+    resource.setDatasourceType('GENERIC')
 
-    cd('/JDBCSystemResources/%(name)s/JDBCResource/%(name)s/JDBCDataSourceParams/%(name)s' % {'name' : name})
-    set('JNDINames',jarray.array([String(jndiName)], String))
+    dataSourceParams = resource.getJDBCDataSourceParams()
+    dataSourceParams.setJNDINames(jarray.array([String(jndiName)], String))
+    dataSourceParams.setGlobalTransactionsProtocol('OnePhaseCommit')
 
-    cd('/JDBCSystemResources/%(name)s/JDBCResource/%(name)s' % {'name' : name})
-    cmo.setDatasourceType('GENERIC')
+    driverParams = resource.getJDBCDriverParams()
+    driverParams.setUrl(dsURL)
+    driverParams.setDriverName(dsDriver)
+    driverParams.setPassword(password)
 
-    cd('/JDBCSystemResources/%(name)s/JDBCResource/%(name)s/JDBCDriverParams/%(name)s' % {'name' : name})
-    cmo.setUrl(dsURL)
-    cmo.setDriverName(dsDriver)
-    cmo.setPassword(password)
+    properties = driverParams.getProperties()
+    properties.createProperty('user', user)
+    properties.createProperty('portNumber', portNumber)
+    properties.createProperty('databaseName', databaseName)
+    properties.createProperty('serverName', host)
+    properties.createProperty('batchPerformanceWorkaround', 'true')
+    properties.createProperty('driverType', '4')
 
-    cd('/JDBCSystemResources/%(name)s/JDBCResource/%(name)s/JDBCConnectionPoolParams/%(name)s' % {'name' : name})
-    cmo.setTestTableName('SQL SELECT COUNT(*) FROM SYSIBM.SYSDUMMY1\\r\\n')
-
-    addProperty(name, 'user', user)
-    addProperty(name, 'portNumber', portNumber)
-    addProperty(name, 'databaseName', databaseName)
-    addProperty(name, 'serverName', host)
-    addProperty(name, 'batchPerformanceWorkaround', 'true')
-    addProperty(name, 'driverType', '4')
-
-    cd('/JDBCSystemResources/%(name)s/JDBCResource/%(name)s/JDBCDataSourceParams/%(name)s' % {'name' : name})
-    cmo.setGlobalTransactionsProtocol('OnePhaseCommit')
-
-    cd('/JDBCSystemResources/%(name)s' % {'name' : name})
-    set('Targets',jarray.array([ObjectName('com.bea:Name=AdminServer,Type=Server')], ObjectName))
+    resource.getJDBCConnectionPoolParams().setTestTableName('SQL SELECT COUNT(*) FROM SYSIBM.SYSDUMMY1\\r\\n')
 
     save()
 """
@@ -170,7 +161,7 @@ def addWTCServer():
         return
     server = cmo.createWTCServer(wtc_server)
 
-    server.addTarget(getMBean('/Servers/AdminServer'))
+    server.setTargets(jarray.array([getMBean('/Servers/AdminServer')], weblogic.management.configuration.TargetMBean))
 
 def addLocalAccessPoint():
     addWTCServer()

@@ -91,6 +91,7 @@ def pre_block_code(block):
     state().initialized_blocks.add(block)
 
 def post_block_code(block):
+    print "save()"
     state().pre_block_definitions.clear()
 
 def add_pre_script_definition(variable, value):
