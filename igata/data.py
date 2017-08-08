@@ -19,6 +19,31 @@ domain_root_dir = os.path.join(domain_dir, 'domain-root')
 """
 
 config_end = """
+writeConfiguration(domain_env_file_win, '\\n'.join([
+    "goto :EOF",
+    "",
+    ":ReadProperties",
+    "for /f usebackq %%o IN (\\"%~1\\") do (",
+    "   call :AddToProperties \\"%%o\\"",
+    ")",
+    "goto :EOF",
+    "",
+    ":AddToProperties",
+    "if NOT \\"%EXTRA_JAVA_PROPERTIES%\\"==\\"\\" (",
+    "   set EXTRA_JAVA_PROPERTIES=%EXTRA_JAVA_PROPERTIES% -D%~1",
+    ") else (",
+    "   set EXTRA_JAVA_PROPERTIES=-D%~1",
+    ")",
+    "goto :EOF",
+    "",
+    ":AddToPath",
+    "if NOT \\"%EXT_PRE_CLASSPATH%\\"==\\"\\" (",
+    "   set EXT_PRE_CLASSPATH=%EXT_PRE_CLASSPATH%;%~dpfn1",
+    ") else (",
+    "   set EXT_PRE_CLASSPATH=%~dpfn1",
+    ")",
+    "goto :EOF"
+    ]))
 exit()
 """
 
@@ -107,16 +132,7 @@ writeConfiguration(domain_env_file_win, '\\n'.join([
     "for %%%%a in (\\"%s/*\\") do (" % domain_pre_classpath,
     "   call :AddToPath \\"%s/%%%%~nxa\\"" % domain_pre_classpath,
     ")",
-    "echo %EXT_PRE_CLASSPATH%",
-    "goto :EOF",
-    "",
-    ":AddToPath",
-    "if NOT \\"%EXT_PRE_CLASSPATH%\\"==\\"\\" (",
-    "   set EXT_PRE_CLASSPATH=%EXT_PRE_CLASSPATH%;%~dpfn1",
-    ") else (",
-    "   set EXT_PRE_CLASSPATH=%~dpfn1",
-    ")",
-    "goto :EOF"
+    "echo EXT_PRE_CLASSPATH=%EXT_PRE_CLASSPATH%",
     "",""
     ]))
 
@@ -134,6 +150,39 @@ writeConfiguration(domain_env_file_unix, '\\n'.join([
     ]))
 """
 
+system_properties_dir = """
+system_properties = '{domain[system-properties-dir]}'
+system_properties_path = os.path.join(domain_dir, system_properties)
+try:
+    os.mkdir(system_properties_path)
+except:
+    print "Directory %s does already exist" % system_properties_path
+
+domain_system_properties = "%%DOMAIN_HOME%%/../%s" % system_properties_path
+
+writeConfiguration(domain_env_file_win, '\\n'.join([
+    "@rem Configuration for system properties directory",
+    "for %%%%a in (\\"%s/*\\") do (" % system_properties_path,
+    "   call :ReadProperties \\"%s/%%%%~nxa\\"" % system_properties_path,
+    ")",
+    "echo EXTRA_JAVA_PROPERTIES=%EXTRA_JAVA_PROPERTIES%",
+    "",""
+    ]))
+
+writeConfiguration(domain_env_file_unix, '\\n'.join([
+    "for i in $DOMAIN_HOME/../%s/*; do" % system_properties_path,
+    "   while read -r line || [[ -n \\"$line\\" ]]; do",
+    "      if [ ! \\"$EXTRA_JAVA_PROPERTIES\\" = \\"\\" ]; then",
+    "         EXTRA_JAVA_PROPERTIES=\\"$EXTRA_JAVA_PROPERTIES -D$line\\"",
+    "      else",
+    "         EXTRA_JAVA_PROPERTIES=-D$line",
+    "      fi",
+    "   done < \\"$i\\"",
+    "done",
+    "echo \\"EXTRA_JAVA_PROPERTIES=$EXTRA_JAVA_PROPERTIES\\"",
+    "export EXTRA_JAVA_PROPERTIES",
+    "",""
+]))
 """
 
 data_source_function = """

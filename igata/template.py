@@ -62,6 +62,14 @@ def PreClasspathDir(dirname = 'pre-classpath'):
     """
     print data.pre_classpath_dir.format(domain={'pre-classpath-dir': dirname})
 
+def SystemPropertiesDir(dirname = 'system-properties'):
+    """
+    SystemProperty
+
+    Creates configuration for a system-properties dir.
+    """
+    print data.system_properties_dir.format(domain={'system-properties-dir': dirname})
+
 def DataSource(jndiName, databaseName, host, portNumber, credentials):
     """
     DataSource
