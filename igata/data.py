@@ -36,6 +36,20 @@ disconnect()
 exit()
 """
 
+overrides_function =  """
+domain_env_file = os.path.join(domain_root_dir, 'bin', 'setUserOverrides')
+domain_env_file_win = domain_env_file + '.cmd'
+domain_env_file_unix = domain_env_file + '.sh'
+
+def writeConfiguration(filename, text, mode = 'a'):
+    try:
+        f = open(filename, mode)
+        f.write(text)
+        f.close()
+    except:
+        print "Failed to write configuration to %s." % filename
+"""
+
 domain = """
 readTemplate(os.path.join(wl_home, 'common', 'templates', 'wls', 'wls.jar'))
 
@@ -58,6 +72,22 @@ setOption('OverwriteDomain', 'true')
 writeDomain(domain_root_dir)
 
 closeTemplate()
+
+writeConfiguration(domain_env_file_win, '\\n'.join([
+    "@echo off",
+    "",
+    "@rem WARNING: This file was created from a igata template",
+    "@rem Any changes to this file may be lost when regenerating the domain.",
+    "",""
+    ]),'w')
+
+writeConfiguration(domain_env_file_unix, '\\n'.join([
+    "#!/bin/sh",
+    "",
+    "# WARNING: This file was created from a igata template",
+    "# Any changes to this file may be lost when regenerating the domain.",
+    "",""
+    ]), 'w')
 """
 
 # Create custom configuration
@@ -70,43 +100,40 @@ try:
 except:
     print "Directory %s does already exist" % pre_classpath_path
 
-domain_env_file = os.path.join(domain_root_dir, 'bin', 'setUserOverrides')
 domain_pre_classpath = "%%DOMAIN_HOME%%/../%s" % pre_classpath
 
-try:
-    f = open(domain_env_file + '.cmd', 'w')
-    f.write("@echo off\\n")
-    f.write("for %%%%a in (\\"%s/*\\") do (\\n" % domain_pre_classpath)
-    f.write("   call :AddToPath \\"%s/%%%%~nxa\\"\\n" % domain_pre_classpath)
-    f.write(")\\n")
-    f.write("echo %EXT_PRE_CLASSPATH%\\n")
-    f.write("goto :EOF\\n")
-    f.write("\\n")
-    f.write(":AddToPath\\n")
-    f.write("if NOT \\"%EXT_PRE_CLASSPATH%\\"==\\"\\" (\\n")
-    f.write("   set EXT_PRE_CLASSPATH=%EXT_PRE_CLASSPATH%;%~dpfn1\\n")
-    f.write(") else (\\n")
-    f.write("   set EXT_PRE_CLASSPATH=%~dpfn1\\n")
-    f.write(")\\n")
-    f.write("goto :EOF\\n")
-    f.close()
-except:
-    print "Failed to configuration to %s" % domain_env_file + '.cmd'
+writeConfiguration(domain_env_file_win, '\\n'.join([
+    "@rem Configuration for pre-classpath directory",
+    "for %%%%a in (\\"%s/*\\") do (" % domain_pre_classpath,
+    "   call :AddToPath \\"%s/%%%%~nxa\\"" % domain_pre_classpath,
+    ")",
+    "echo %EXT_PRE_CLASSPATH%",
+    "goto :EOF",
+    "",
+    ":AddToPath",
+    "if NOT \\"%EXT_PRE_CLASSPATH%\\"==\\"\\" (",
+    "   set EXT_PRE_CLASSPATH=%EXT_PRE_CLASSPATH%;%~dpfn1",
+    ") else (",
+    "   set EXT_PRE_CLASSPATH=%~dpfn1",
+    ")",
+    "goto :EOF"
+    "",""
+    ]))
 
-try:
-    f = open(domain_env_file + '.sh', 'w')
-    f.write("for i in $DOMAIN_HOME/../%s/*; do\\n" % pre_classpath)
-    f.write("   if [ ! \\"$EXT_PRE_CLASSPATH\\" = \\"\\" ]; then\\n")
-    f.write("      EXT_PRE_CLASSPATH=$EXT_PRE_CLASSPATH:$i\\n")
-    f.write("   else\\n")
-    f.write("      EXT_PRE_CLASSPATH=$i\\n")
-    f.write("   fi\\n")
-    f.write("done\\n")
-    f.write("echo \\"EXT_PRE_CLASSPATH=$EXT_PRE_CLASSPATH\\"")
-    f.write("export EXT_PRE_CLASSPATH\\n")
-    f.close()
-except:
-    print "Failed to configuration to %s" % domain_env_file + '.sh'
+writeConfiguration(domain_env_file_unix, '\\n'.join([
+    "for i in $DOMAIN_HOME/../%s/*; do" % pre_classpath,
+    "   if [ ! \\"$EXT_PRE_CLASSPATH\\" = \\"\\" ]; then",
+    "      EXT_PRE_CLASSPATH=$EXT_PRE_CLASSPATH:$i",
+    "   else",
+    "      EXT_PRE_CLASSPATH=$i",
+    "   fi",
+    "done",
+    "echo \\"EXT_PRE_CLASSPATH=$EXT_PRE_CLASSPATH\\"",
+    "export EXT_PRE_CLASSPATH",
+    "",""
+    ]))
+"""
+
 """
 
 data_source_function = """

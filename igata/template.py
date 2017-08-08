@@ -17,7 +17,8 @@ def Configuration(name = None):
        PreClasspathDir()
     """
     if not name:
-        name = 'domain'
+        # Use same name as template file
+        name = os.path.splitext(os.path.basename(sys.argv[2]))[0]
     return scope(name, 'config')
 
 def Resources(name = None):
@@ -32,7 +33,8 @@ def Resources(name = None):
         DefaultConnectionFactory()
     """
     if not name:
-        name = 'resources'
+        # Use same name as template file
+        name = os.path.splitext(os.path.basename(sys.argv[2]))[0] + '_resources'
     add_pre_script_definition('server_url', 't3://localhost:7001')
     return scope(name, 'resources')
 
@@ -52,14 +54,12 @@ def Domain(name, credentials):
     add_pre_script_definition('admin_password', credentials.password )
     print data.domain.format(domain={'user' : 'admin_user', 'password' : 'admin_password'})
 
-def PreClasspathDir(dirname = None):
+def PreClasspathDir(dirname = 'pre-classpath'):
     """
     PreClasspathDir
 
     Create configuration for a pre-classpath dir.
     """
-    if not dirname:
-        dirname = 'pre-classpath'
     print data.pre_classpath_dir.format(domain={'pre-classpath-dir': dirname})
 
 def DataSource(jndiName, databaseName, host, portNumber, credentials):

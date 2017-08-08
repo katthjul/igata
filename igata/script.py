@@ -11,7 +11,8 @@ def normalize(text):
 global_pre_script_definitions = {}
 
 class State:
-    def __init__(self, block = None, old_state = None):
+    def __init__(self, scope = None, block = None, old_state = None):
+        self.scope = scope
         self.block = block
         self.subblock = None
 
@@ -35,7 +36,7 @@ def scope(name, block = None):
         name = normalize(name)
 
     old_state = global_current_state
-    global_current_state = State(block, old_state)
+    global_current_state = State(scope, block, old_state)
 
     current_resultfile_state = None
 
@@ -65,6 +66,7 @@ def subscope(block):
 def pre_script_code():
     if state().block == 'config':
         print data.config_begin
+        print data.overrides_function
     else:
         print data.data_source_function
         print data.jms_function
