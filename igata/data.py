@@ -125,12 +125,10 @@ try:
 except:
     print "Directory %s does already exist" % pre_classpath_path
 
-domain_pre_classpath = "%%DOMAIN_HOME%%/../%s" % pre_classpath
-
 writeConfiguration(domain_env_file_win, '\\n'.join([
     "@rem Configuration for pre-classpath directory",
-    "for %%%%a in (\\"%s/*\\") do (" % domain_pre_classpath,
-    "   call :AddToPath \\"%s/%%%%~nxa\\"" % domain_pre_classpath,
+    "for %%%%a in (\\"%%DOMAIN_HOME%%/../%s/*\\") do (" % pre_classpath,
+    "   call :AddToPath \\"%%DOMAIN_HOME%%/../%s/%%%%~nxa\\"" % pre_classpath,
     ")",
     "echo EXT_PRE_CLASSPATH=%EXT_PRE_CLASSPATH%",
     "",""
@@ -158,19 +156,17 @@ try:
 except:
     print "Directory %s does already exist" % system_properties_path
 
-domain_system_properties = "%%DOMAIN_HOME%%/../%s" % system_properties_path
-
 writeConfiguration(domain_env_file_win, '\\n'.join([
     "@rem Configuration for system properties directory",
-    "for %%%%a in (\\"%s/*\\") do (" % system_properties_path,
-    "   call :ReadProperties \\"%s/%%%%~nxa\\"" % system_properties_path,
+    "for %%%%a in (\\"%%DOMAIN_HOME%%/../%s/*\\") do (" % system_properties,
+    "   call :ReadProperties \\"%%DOMAIN_HOME%%/../%s/%%%%~nxa\\"" % system_properties,
     ")",
     "echo EXTRA_JAVA_PROPERTIES=%EXTRA_JAVA_PROPERTIES%",
     "",""
     ]))
 
 writeConfiguration(domain_env_file_unix, '\\n'.join([
-    "for i in $DOMAIN_HOME/../%s/*; do" % system_properties_path,
+    "for i in $DOMAIN_HOME/../%s/*; do" % system_properties,
     "   while read -r line || [[ -n \\"$line\\" ]]; do",
     "      if [ ! \\"$EXTRA_JAVA_PROPERTIES\\" = \\"\\" ]; then",
     "         EXTRA_JAVA_PROPERTIES=\\"$EXTRA_JAVA_PROPERTIES -D$line\\"",
