@@ -60,6 +60,7 @@ class Engine(object):
         if not size:
             return
         stream.seek(0)
+        print 'Generating script %s.' % filename
         with open(filename, 'w') as resultfile:
             for key, value in pre_script_definitions.items():
                 resultfile.write("%s = '%s'\n" % (key, value))

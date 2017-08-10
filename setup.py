@@ -5,5 +5,5 @@ from distutils.core import setup
 setup(name='igata',
       version='0.1',
       packages=['igata'],
-      scripts=['bin/igata'],
+      scripts=['bin/igata', 'bin/igata.cmd'],
      )
