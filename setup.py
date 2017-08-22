@@ -6,4 +6,11 @@ setup(name='igata',
       version='0.1',
       packages=['igata'],
       scripts=['bin/igata', 'bin/igata.cmd'],
+      description='JEE Domain Tool and DSL',
+      url='https://github.com/katthjul/igata',
+      author='Pauline Gomér',
+      author_email='pauline.gomer@gmail.com',
+      maintainer='Jon-Erik Johnzon',
+      maintainer_email='jone@torrentkatten.se',
+      license='MIT'
      )
