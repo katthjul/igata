@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from collections import Counter
 from contextlib import contextmanager
 import re
@@ -103,4 +104,3 @@ def add_pre_script_definition(variable, value):
 
 def add_pre_block_definition(variable, value):
     state().pre_block_definitions[variable] = value
-

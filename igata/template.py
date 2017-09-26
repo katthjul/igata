@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from collections import namedtuple
 
 import data
@@ -18,7 +19,7 @@ def Configuration(name = None):
     """
     if not name:
         # Use same name as template file
-        name = os.path.splitext(os.path.basename(sys.argv[2]))[0]
+        name = os.path.splitext(os.path.basename(sys.argv[2]))[0]  + '_config'
     return scope(name, 'config')
 
 def Resources(name = None):
@@ -156,4 +157,3 @@ def Queue(jndiName):
     Creates a JMS queue.
     """
     print data.queue.format(queue = {'name' : jndiName, 'jndiName' : jndiName})
-
