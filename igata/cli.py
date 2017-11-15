@@ -1,10 +1,13 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 import argparse
-import os
 
-import domain
 import engine
 import run
+import sys
+
+# sys.path.append('C:/Program Files/JetBrains/PyCharm 2017.2.1/debug-eggs/pycharm-debug.egg')
+#
+# import pydevd
 
 def main():
     parser = argparse.ArgumentParser()
@@ -22,8 +25,11 @@ def main():
     try:
         args.func(args)
     except Exception as e:
-       print('exception: ' + str(e))
+        sys.stdout = sys.__stdout__
+        print('exception: ' + str(e))
+        exit(-1)
+
 
 if __name__ == '__main__':
+    # pydevd.settrace('localhost', port=53704, stdoutToServer=True, stderrToServer=True)
     main()
-

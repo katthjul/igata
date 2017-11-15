@@ -67,17 +67,22 @@ def pre_script_code():
     if state().block == 'config':
         print data.config_begin
         print data.overrides_function
-    else:
+    elif state().block == 'resources':
         print data.data_source_function
         print data.jms_function
         print data.wtc_function
         print data.resources_begin
+    else:
+        print data.deployment_functions
+        print data.deployments_start
 
 def post_script_code():
     if state().block == 'config':
         print data.config_end
-    else:
+    elif state().block == 'resources':
         print data.resources_end
+    else:
+        print data.deployments_end
 
 def pre_block_code(block):
     if block in state().initialized_blocks:

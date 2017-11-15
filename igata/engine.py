@@ -92,6 +92,7 @@ class Engine(object):
         for output, filename in self.output_done:
             self.write(output, filename, pre_script_definitions)
 
+
 def main(args):
     if not os.path.isfile(args.template):
         sys.stderr.write("error: Could not find the template file " + args.template + '\n')
@@ -99,6 +100,7 @@ def main(args):
     engine().run(args.template)
 
 __global_engine = None
+
 
 def engine():
     global __global_engine

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: UTF-8 -*-
 
 from distutils.core import setup
 
@@ -14,4 +15,4 @@ setup(name='igata',
       maintainer='Jon-Erik Johnzon',
       maintainer_email='jone@torrentkatten.se',
       license='MIT'
-     )
+      )

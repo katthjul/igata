@@ -157,3 +157,82 @@ def Queue(jndiName):
     """
     print data.queue.format(queue = {'name' : jndiName, 'jndiName' : jndiName})
 
+def Deployments(name = None):
+    """
+    Deployments
+
+    Adds deployemnts to the domain, libraries and applications.
+
+    Shall be used in a 'with statement'.
+
+    with Deployments():
+        with Libraries():
+        with Applications():
+    """
+    if not name:
+        # Use same name as template file
+        name = os.path.splitext(os.path.basename(sys.argv[2]))[0] + '_deployments'
+    add_pre_script_definition('server_url', 't3://localhost:7001')
+    return scope(name, 'deployments')
+
+def Libraries(name = None):
+    """
+    Libraries
+
+    Creates the resources of the domain.
+
+    Shall be used in a 'with statement'.
+
+     with Deployments():
+        with Libraries():
+           Library(name,path)
+
+    """
+    if state().block and state().block != 'deployments':
+        raise SyntaxError('Libraries can only be used in a deployments block')
+    return subscope('libraries')
+
+def Library(name,path):
+    """
+    Resources
+
+    Creates a Library deployment
+
+    Shall be used in a 'with statement'.
+        with Libraries():
+           Library(name,path)
+    """
+    if state().block and state().subblock != 'libraries':
+        raise SyntaxError('Library can only be used in a Libraries block')
+    print data.library.format(deploy={'name': name, 'path': path})
+
+def Applications(name = None):
+    """
+    Applications
+
+    Creates the resources of the domain.
+
+    Shall be used in a 'with statement'.
+
+     with Deployments():
+        with Applications():
+           Application(name,path)
+
+    """
+    if state().block and state().block != 'deployments':
+        raise SyntaxError('Applications can only be used in a deployments block')
+    return subscope('applications')
+
+def Application(name,path):
+    """
+    Resources
+
+    Creates a Applications deployment
+
+    Shall be used in a 'with statement'.
+        with Applications():
+           Application(name,path)
+    """
+    if state().block and state().subblock != 'applications':
+        raise SyntaxError('Application can only be used in a Applications block')
+    print data.application.format(deploy={'name': name, 'path': path})

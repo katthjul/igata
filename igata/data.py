@@ -375,3 +375,32 @@ queue = """
 addQueue('{queue[name]}', '{queue[jndiName]}')
 """
 
+deployment_functions = """
+def deployLibrary(name,path):
+    deploy(None,path,upload='true',libraryModule='true')
+
+def deployApplication(name,path):
+    deploy(name,path,upload='true',libraryModule='false')
+"""
+
+library = """
+deployLibrary('{deploy[name]}', '{deploy[path]}')
+"""
+
+application = """
+deployApplication('{deploy[name]}', '{deploy[path]}')
+"""
+
+deployments_start = """
+connect(admin_user, admin_password, server_url)
+
+edit()
+startEdit()
+"""
+
+deployments_end = """
+save()
+activate()
+disconnect()
+exit()
+"""
