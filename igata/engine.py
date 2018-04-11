@@ -60,7 +60,7 @@ class Engine(object):
         if not size:
             return
         stream.seek(0)
-        print 'Generating script %s.' % filename
+
         with open(filename, 'w') as resultfile:
             for key, value in pre_script_definitions.items():
                 resultfile.write("%s = '%s'\n" % (key, value))
@@ -78,8 +78,9 @@ class Engine(object):
             code = compile(template.getvalue(), template_file, 'exec')
             template.close()
             exec(code, globalVariables)
-        except (NameError, SyntaxError, TypeError) as e:
-            sys.stderr.write( "Error in %s: %s.\n" % (os.path.realpath( template_file), str(e)))
+        except Exception as e:
+            sys.stdout = sys.__stdout__
+            sys.stderr.write("Error when processing %s.\n" % os.path.realpath(template_file))
             raise
 
         sys.stdout = sys.__stdout__
@@ -108,4 +109,3 @@ def engine():
         __global_engine = Engine()
 
     return __global_engine
-

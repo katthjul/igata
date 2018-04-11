@@ -42,7 +42,7 @@ Installing igata
 
 * Create the domain with the following steps::
 
-    igata run weblogic_test.py
+    igata run weblogic_test_config.py
     start the weblogic domain
     igata run weblogic_test_resources.py
 

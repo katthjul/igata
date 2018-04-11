@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import sys
 
@@ -13,4 +14,3 @@ def main(args):
         sys.exit(1)
 
     os.system("%s %s" % (wlst_command(), ' '.join(args.script)))
-

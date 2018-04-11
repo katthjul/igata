@@ -4,6 +4,7 @@ config_begin = """
 import ntpath
 import os
 import posixpath
+import shutil
 import sys
 
 wl_home = os.environ["WL_HOME"]
@@ -16,6 +17,10 @@ if not domain_name:
     domain_name = os.path.splitext(os.path.basename(sys.argv[0]))[0]
 domain_dir = os.path.normpath(os.path.join(domain_path, domain_name))
 domain_root_dir = os.path.join(domain_dir, 'domain-root')
+
+if os.path.isdir(domain_root_dir):
+    print "Directory %s exists, deleting..." % domain_root_dir
+    shutil.rmtree(domain_root_dir)
 """
 
 config_end = """
@@ -93,6 +98,7 @@ cd('/')
 cd('Security/base_domain/User/%s' % {domain[user]})
 cmo.setPassword({domain[password]})
 
+print "Creating directory %s ..." % domain_root_dir
 setOption('OverwriteDomain', 'true')
 writeDomain(domain_root_dir)
 
