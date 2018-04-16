@@ -3,8 +3,8 @@ from collections import Counter
 from contextlib import contextmanager
 import re
 
-import data
-from engine import *
+import igata.data as data
+from igata.engine import *
 
 def normalize(text):
     return re.sub( '[^\w]+', '_', text)

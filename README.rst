@@ -47,3 +47,27 @@ Installing igata
     igata run weblogic_test_resources.py
 
 * You should now have a weblogic domain with the declared resources
+
+-----------------
+Developing igata
+-----------------
+
+Follow the steps to install igata in editable mode,
+where a code change is immediately available for testing.
+It is recommended to use a virtualenv for development.
+
+* Clone the repository from GitHub_::
+
+    git clone https://github.com/katthjul/igata.git
+
+* Navigate to into the repository
+
+    cd igata/
+
+* Install igata and its dependencies
+
+    pip install -r requirements.txt
+
+* You should now igata installed as a symlinked package
+
+.. _GitHub: https://github.com/katthjul/igata

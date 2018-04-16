@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import argparse
 
-import engine
+import igata.engine as engine
 import run
 import sys
 

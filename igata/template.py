@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from collections import namedtuple
 
-import data
-from script import *
+import igata.data
+from igata.script import *
 
 Credentials = namedtuple('Credentials', ['user', 'password'])
 

@@ -2,7 +2,7 @@
 
 import os
 
-import data
+import igata.data as data
 
 def main(args):
     generate(args.name, args.user, args.password)
